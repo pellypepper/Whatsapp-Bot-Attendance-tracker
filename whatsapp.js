@@ -660,9 +660,9 @@ function doPost(e) {
   
   
   function sendWhatsAppResponse(to, message) {
-    var twilioSid = 'ACd21e0decb081c0aa5f95c883a37bbf6f';  // Replace with your actual SID
-    var twilioAuthToken = '0cfe3349218fc5cd533d246929a2f165';  // Replace with your actual token
-    var from = 'whatsapp:+14155238886';  // Your Twilio WhatsApp number
+    var twilioSid = '';  // Replace with your actual SID
+    var twilioAuthToken = '';  // Replace with your actual token
+    var from = '';  // Your Twilio WhatsApp number
     
     // Make sure 'to' has whatsapp: prefix if it doesn't already
     if (!to.startsWith('whatsapp:')) {

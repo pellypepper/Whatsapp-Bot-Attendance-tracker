@@ -128,24 +128,23 @@ function doPost(e) {
     switch (message) {
       case "1":
         updatedState.currentAction = "check_in";
-        Logger.log(`Setting state: currentAction = "check_in" for user: ${from}`);
+
         updateUserState(from, updatedState);
         return "📝 *Check-In*\n\nPlease enter your name to check in, or just send '1' to check in with your phone number.";
   
       case "2":
         updatedState.currentAction = "check_out";
-        Logger.log(`Setting state: currentAction = "check_out" for user: ${from}`);
+
         updateUserState(from, updatedState);
         return "🔚 *Check-Out*\n\nPlease enter your name to check out, or just send '1' to check out with your phone number.";
   
       case "3":
         updatedState.currentAction = "record_note";
-        Logger.log(`Setting state: currentAction = "record_note" for user: ${from}`);
         updateUserState(from, updatedState);
         return "📝 *Record Note*\n\nPlease enter the note you'd like to record.";
   
       case "4":
-        Logger.log(`Fetching notes for user: ${from}`);
+
         var notes = getNotes(from); // Retrieve notes
         updateUserState(from, updatedState);
   
@@ -157,14 +156,14 @@ function doPost(e) {
         }
   
       case "menu":
-        Logger.log(`User requested the menu: '${message}'`);
+      
         updatedState.awaitingMenuSelection = true;
         updateUserState(from, updatedState);
         return getWelcomeMessage();
   
       default:
         updateUserState(from, { awaitingMenuSelection: true });
-        Logger.log(`Invalid selection: '${message}' for user: ${from}`);
+    
         return `❓ I didn't understand that selection. Please choose a number between 1-4:\n\n${getMenuOptions()}`;
     }
   }
@@ -173,7 +172,7 @@ function doPost(e) {
     const currentAction = userState.currentAction;
     const timestamp = new Date();
   
-    Logger.log(`Handling action for: ${from} | Action: ${currentAction} | Message: ${message}`);
+   
   
     const name = message === "1" ? extractNameFromPhoneNumber(from) : message;
   
@@ -184,14 +183,14 @@ function doPost(e) {
   
     switch (currentAction) {
       case "check_in":
-        Logger.log(`Check-in: Name=${name}`);
+      
         result = recordAttendance(name, from, timestamp, "check-in");
         return result.success
           ? `✅ *Check-In Successful!*\n\nHi ${name}, you've been checked in at ${formatTime(timestamp)}.\n\nType *menu* to see more options.`
           : `❌ *Check-In Failed*\n\nError: ${result.error}\n\nType *menu* to try again.`;
   
       case "check_out":
-        Logger.log(`Check-out: Name=${name}`);
+      
         result = recordAttendance(name, from, timestamp, "check-out");
         return result.success
           ? `✅ *Check-Out Successful!*\n\nHi ${name}, you've been checked out at ${formatTime(timestamp)}.\n\nType *menu* to see more options.`
@@ -204,14 +203,14 @@ function doPost(e) {
           : `❌ *Failed to Record Note*\n\nError: ${result.error}\n\nType *menu* to try again.`;
   
       default:
-        Logger.log("Unknown or expired action.");
+       
         return getWelcomeMessage();
     }
   }
   
   function recordAttendance(name, phoneNumber, timestamp, type) {
     try {
-      Logger.log(`Recording ${type} | Name: ${name} | Phone: ${phoneNumber} | Time: ${timestamp}}`);
+     
   
       const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
       const sheetName = type === "check-in" ? 'whatsapp_checkins' : 'whatsapp_checkouts';
@@ -235,10 +234,10 @@ function doPost(e) {
         type,
       ]);
   
-      Logger.log("Row appended successfully.");
+ 
       return { success: true };
     } catch (error) {
-      Logger.log(`Error in recordAttendance: ${error.stack}`);
+   
       return { success: false, error: error.toString() };
     }
   }
@@ -261,7 +260,7 @@ function doPost(e) {
     const latLng = "51.5074,-0.1278"; // London
   
     const result = handleActionInput(latLng, phone, fakeUserState);
-    Logger.log("Test result for Check-In with Location:\n" + result);
+  
   }
   
   function testHandleCheckOutWithName() {
@@ -270,14 +269,10 @@ function doPost(e) {
     const name = "John Doe";
   
     const result = handleActionInput(name, phone, fakeUserState);
-    Logger.log("Test result for Check-Out with Name:\n" + result);
+   
   }
   
-  function testLocationParsing() {
-    Logger.log("Should be valid:", locationCheck("40.7128,-74.0060"));
-    Logger.log("Should be null:", locationCheck("hello world"));
-  }
-  
+
   
   
   
@@ -344,18 +339,18 @@ function doPost(e) {
         throw new Error("Phone number is missing.");
       }
   
-      Logger.log("🔍 Fetching user state for: " + phoneNumber);
+     
       
       const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
       const sheet = spreadsheet.getSheetByName('user_states');
   
       if (!sheet) {
-        Logger.log("❌ 'user_states' sheet not found.");
+        
         return null;
       }
   
       const cleanPhone = phoneNumber.replace('whatsapp:', '').replace('+', '');
-      Logger.log("✅ Cleaned phone number: " + cleanPhone);
+
   
       const data = sheet.getDataRange().getValues();
       
@@ -377,21 +372,21 @@ function doPost(e) {
               data: data[i][4] || "" // fallback if undefined
             };
   
-            Logger.log("🕐 Found more recent state in row " + (i + 1));
+   
           }
         }
       }
   
       if (mostRecentState) {
-        Logger.log("✅ Found state: " + JSON.stringify(mostRecentState));
+      
         return mostRecentState;
       } else {
-        Logger.log("⚠️ No existing state found for user.");
+       
         return null;
       }
   
     } catch (error) {
-      Logger.log("🚨 Error in getUserState: " + error.stack);
+     
       return null;
     }
   }
@@ -409,15 +404,15 @@ function doPost(e) {
       var sheet = spreadsheet.getSheetByName('user_states');
       
       if (!sheet) {
-        Logger.log("Sheet 'user_states' does not exist. Creating it...");
+       
         sheet = spreadsheet.insertSheet('user_states');
         sheet.appendRow(['Phone Number', 'Last Interaction', 'Current Action', 'Awaiting Menu Selection', 'Data']);
       }
   
       var cleanPhone = phoneNumber.replace('whatsapp:', '').replace('+', '');
-      Logger.log("Getting current state for: " + cleanPhone);
+    
       var currentState = getUserState(phoneNumber);
-      Logger.log("Current state: " + JSON.stringify(currentState));
+
   
       var newState = {
         lastInteraction: new Date(),
@@ -429,7 +424,7 @@ function doPost(e) {
       // Convert null to empty string for saving to spreadsheet if needed
       var currentActionValue = newState.currentAction === null ? "" : newState.currentAction;
       
-      Logger.log("New state to save: " + JSON.stringify(newState));
+      
       
       // ALWAYS create a new row for state updates to avoid confusion
       sheet.appendRow([
@@ -439,7 +434,7 @@ function doPost(e) {
         String(newState.awaitingMenuSelection), // Convert boolean to string
         newState.data
       ]);
-      Logger.log("New state row added for: " + phoneNumber);
+ 
       
       // Clean up old states every time we update
       cleanupUserStates();
@@ -458,7 +453,7 @@ function doPost(e) {
       var sheet = spreadsheet.getSheetByName('user_states');
       
       if (!sheet) {
-        Logger.log("Sheet 'user_states' does not exist.");
+       
         return;
       }
       
@@ -493,7 +488,7 @@ function doPost(e) {
         sheet.deleteRow(rowsToDelete[i]);
       }
       
-      Logger.log("Cleanup complete. Removed " + rowsToDelete.length + " duplicate entries.");
+  
     } catch (error) {
       Logger.log("Error in cleanupUserStates: " + error.message);
     }
@@ -504,9 +499,9 @@ function doPost(e) {
       var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
       var sheet = spreadsheet.getSheetByName('user_states') || spreadsheet.insertSheet('user_states');
       sheet.appendRow(['447542955386', new Date(), null, 'true', null]);
-      Logger.log("Row appended successfully.");
+
       var updatedData = sheet.getDataRange().getValues();
-      Logger.log("Updated sheet data: " + JSON.stringify(updatedData));
+
     } catch (error) {
       Logger.log("Error in testAppendRow: " + error.message);
     }
@@ -514,7 +509,7 @@ function doPost(e) {
   function saveNote(phoneNumber, noteText, timestamp) {
     try {
       var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-      // FIXED: Use consistent sheet name between save and retrieve functions
+
       var sheet = spreadsheet.getSheetByName('user_notes');
       
       if (!sheet) {
@@ -534,7 +529,7 @@ function doPost(e) {
       
       return { success: true };
     } catch (error) {
-      Logger.log('Error in saveNote: ' + error.stack);
+     
       return { success: false, error: error.toString() };
     }
   }
@@ -553,18 +548,16 @@ function doPost(e) {
       
       // Clean phone number (remove 'whatsapp:' and '+')
       var cleanPhone = phoneNumber.replace('whatsapp:', '').replace('+', '');
-      console.log('Looking for notes with phone number: ' + cleanPhone);
+     
       
       // Get notes
       var data = sheet.getDataRange().getValues();
       var notes = [];
       
-      // Log headers to verify column structure
-      console.log('Headers: ' + data[0].join(', '));
+   
       
       for (var i = 1; i < data.length; i++) {
-        // Log the current row's phone number for debugging
-        console.log('Row ' + i + ' phone: ' + data[i][3] + ' vs ' + cleanPhone);
+       
         
         // Use trim() to remove any potential whitespace
         if (String(data[i][3]).trim() === cleanPhone.trim()) {
@@ -577,10 +570,10 @@ function doPost(e) {
         }
       }
       
-      console.log('Total notes found: ' + notes.length);
+    
       return notes;
     } catch (error) {
-      console.error('Error in getNotes: ' + error.stack);
+ 
       return [];
     }
   }
@@ -598,27 +591,27 @@ function doPost(e) {
     if (!spreadsheet.getSheetByName('user_states')) {
       var statesSheet = spreadsheet.insertSheet('user_states');
       statesSheet.appendRow(['Phone Number', 'Last Interaction', 'Current Action', 'Awaiting Menu Selection', 'Data']);
-      Logger.log("Created user_states sheet");
+    
     }
     
     // Create user_notes sheet if it doesn't exist
     if (!spreadsheet.getSheetByName('user_notes')) {
       var notesSheet = spreadsheet.insertSheet('user_notes');
       notesSheet.appendRow(['Timestamp', 'Date', 'Time', 'Phone Number', 'Note']);
-      Logger.log("Created user_notes sheet");
+  
     }
     
     // Create check-in and check-out sheets if they don't exist
     if (!spreadsheet.getSheetByName('whatsapp_checkins')) {
       var checkinsSheet = spreadsheet.insertSheet('whatsapp_checkins');
       checkinsSheet.appendRow(['Timestamp', 'Date', 'Time', 'Name', 'Phone Number']);
-      Logger.log("Created whatsapp_checkins sheet");
+    
     }
     
     if (!spreadsheet.getSheetByName('whatsapp_checkouts')) {
       var checkoutsSheet = spreadsheet.insertSheet('whatsapp_checkouts');
       checkoutsSheet.appendRow(['Timestamp', 'Date', 'Time', 'Name', 'Phone Number']);
-      Logger.log("Created whatsapp_checkouts sheet");
+     
     }
   }
   
